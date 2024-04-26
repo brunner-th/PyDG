@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import meshpy.triangle as triangle
+import meshpy.tet as tet
 from Node import Node
 from Element import Element
 
@@ -15,7 +16,7 @@ class Mesh:
         self.edge_connectivity_matrix = None
     
 
-    def initialize_basic_square_mesh(self):
+    def generate_square_mesh_with_hole(self):
 
         def round_trip_connect(start, end):
             return [(i, i + 1) for i in range(start, end)] + [(end, start)]
@@ -42,6 +43,27 @@ class Mesh:
         info.set_facets(facets)
 
         mesh = triangle.build(info, refinement_func=needs_refinement)
+
+        self.points = np.array(mesh.points)
+        self.triangles = np.array(mesh.elements)
+        self.facets = np.array(mesh.facets)
+
+
+    def generate_basic_square_mesh(self, max_vol = 0.01):
+
+        points = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
+        facets = [[0, 1], [1, 2], [2, 3], [3, 1]]
+
+        def round_trip_connect(start, end):
+            return [(i, i + 1) for i in range(start, end)] + [(end, start)]
+
+        facets = round_trip_connect(0, len(points)-1)
+
+        info = triangle.MeshInfo()
+        info.set_points(points)
+        info.set_facets(facets)
+
+        mesh = triangle.build(info, max_volume=max_vol)
 
         self.points = np.array(mesh.points)
         self.triangles = np.array(mesh.elements)

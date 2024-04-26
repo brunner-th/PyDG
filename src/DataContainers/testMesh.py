@@ -5,7 +5,7 @@ from Mesh import Mesh
 max_volume = 10
 
 mesh = Mesh()
-mesh.initialize_basic_square_mesh()
+mesh.generate_basic_square_mesh(max_vol=0.001)
 mesh.plot_mesh()
 
 print(mesh.points)
