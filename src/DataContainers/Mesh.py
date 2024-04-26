@@ -1,12 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import meshpy.triangle as triangle
+from Node import Node
+from Element import Element
 
 class Mesh:
     def __init__(self):
-        self.points = np.array([0])
-        self.triangles = np.array([0])
-        self.facets = np.array([0])
+        self.points
+        self.triangles
+        self.facets
+        self.node_list 
+        self.element_list
+        self.node_connectivity_matrix
+        self.edge_connectivity_matrix
     
 
     def initialize_basic_square_mesh(self):
@@ -46,6 +52,29 @@ class Mesh:
     def plot_mesh(self):
         plt.triplot(self.points[:, 0], self.points[:, 1], self.triangles, linewidth = 1)
         plt.show()
+
+    def fillNodeList(self):
+        self.node_list = []
+        for num, point in enumerate(self.points):
+            node = Node(num, point[num,:])
+            self.node_list.append(node)
+
+    def fillElementList(self):
+        self.element_list = []
+        for num, nodelist in enumerate(self.triangles):
+
+            node_num_list = self.triangles[num,:]
+            node1_num = node_num_list[0]
+            node2_num = node_num_list[1]
+            node3_num = node_num_list[2]
+
+            nodelist = [self.node_list[node1_num], 
+                        self.node_list[node2_num],
+                        self.node_list[node3_num]]
+            
+            edges = None
+
+            self.element_list.append(Element(num, nodelist, edges))
 
 
     def calculate_point_connectivity_matrix():
