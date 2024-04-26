@@ -6,13 +6,13 @@ from Element import Element
 
 class Mesh:
     def __init__(self):
-        self.points
-        self.triangles
-        self.facets
-        self.node_list 
-        self.element_list
-        self.node_connectivity_matrix
-        self.edge_connectivity_matrix
+        self.points = None
+        self.triangles = None
+        self.facets = None
+        self.node_list = None
+        self.element_list = None
+        self.node_connectivity_matrix = None
+        self.edge_connectivity_matrix = None
     
 
     def initialize_basic_square_mesh(self):
@@ -43,7 +43,6 @@ class Mesh:
 
         mesh = triangle.build(info, refinement_func=needs_refinement)
 
-
         self.points = np.array(mesh.points)
         self.triangles = np.array(mesh.elements)
         self.facets = np.array(mesh.facets)
@@ -55,8 +54,8 @@ class Mesh:
 
     def fillNodeList(self):
         self.node_list = []
-        for num, point in enumerate(self.points):
-            node = Node(num, point[num,:])
+        for num, p in enumerate(self.points):
+            node = Node(num, self.points[num,:])
             self.node_list.append(node)
 
     def fillElementList(self):
@@ -72,7 +71,11 @@ class Mesh:
                         self.node_list[node2_num],
                         self.node_list[node3_num]]
             
-            edges = None
+            edges = np.array([[node1_num, node2_num],
+                              [node2_num, node3_num],
+                              [node3_num, node1_num]])
+
+            edges = self.facets
 
             self.element_list.append(Element(num, nodelist, edges))
 

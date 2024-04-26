@@ -7,6 +7,9 @@ class Element:
         self.node_list = node_list
         self.edges =  edges
         self.number_edges = len(edges)
+        self.neighbour_elements = None
+
+
 
     
 
