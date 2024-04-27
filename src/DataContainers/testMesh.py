@@ -12,14 +12,21 @@ print(mesh.points)
 
 mesh.fillNodeList()
 
-print(mesh.node_list)
-print(mesh.facets)
+print(np.shape(mesh.node_list))
+print(np.shape(mesh.facets))
 
 mesh.fillElementList()
+
+print(np.shape(mesh.element_list))
 
 for element in mesh.element_list:
     for node in element.node_list:
         plt.plot(node.coordinates[0], node.coordinates[1], marker = ".", color = "k")
+
+
+mesh.fillDOFList()
+
+print(np.shape(mesh.dof_list))
 
 plt.show()
 

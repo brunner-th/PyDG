@@ -4,6 +4,7 @@ import meshpy.triangle as triangle
 import meshpy.tet as tet
 from Node import Node
 from Element import Element
+from DOF import DOF
 
 class Mesh:
     def __init__(self):
@@ -12,6 +13,7 @@ class Mesh:
         self.facets = None
         self.node_list = None
         self.element_list = None
+        self.dof_list = None
         self.node_connectivity_matrix = None
         self.edge_connectivity_matrix = None
     
@@ -101,6 +103,15 @@ class Mesh:
 
             self.element_list.append(Element(num, nodelist, edges))
 
+    
+    def fillDOFList(self):
+        self.dof_list = []
+        dof_num = 0
+        for element in self.element_list:
+            ele_num = element.element_number
+            for node in element.node_list:
+                self.dof_list.append(DOF(dof_num, node.node_number, ele_num, node.coordinates))
+                dof_num += 1
 
     def calculate_point_connectivity_matrix():
         point_connectivity_matrix = np.zeros((10))
