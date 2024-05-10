@@ -4,12 +4,15 @@ import meshpy.triangle as triangle
 import meshpy.tet as tet
 from Node import Node
 from Element import Element
+from DOF import DOF
+
 
 class Mesh:
     def __init__(self):
         self.points = None
         self.triangles = None
         self.facets = None
+        self.dof_list = None
         self.node_list = None
         self.element_list = None
         self.node_connectivity_matrix = None
@@ -79,6 +82,17 @@ class Mesh:
         for num, p in enumerate(self.points):
             node = Node(num, self.points[num,:])
             self.node_list.append(node)
+
+    def fillDOFList(self):
+        self.dof_list = []
+        dof_ind = 0
+        for element in self.element_list:
+            for node in element.node_list:
+                dof = DOF(dof_ind, node.coordinates, node.node_number)
+                self.dof_list.append(dof)
+                node.addDOF(dof)
+                element.addDOF(dof)
+                dof_ind += 1
 
     def fillElementList(self):
         self.element_list = []

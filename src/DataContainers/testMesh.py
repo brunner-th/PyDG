@@ -23,3 +23,5 @@ for element in mesh.element_list:
 
 plt.show()
 
+mesh.fillDOFList()
+
