@@ -1,18 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import DataContainers.Mesh as Mesh
-import Assembler.Assembler as Assembler
+from Assembler.Assembler import Assembler
 #import SimulationCase
 
 
 mesh = Mesh.Mesh()
-mesh.generate_basic_square_mesh(max_vol=0.001)
+mesh.generate_basic_square_mesh(max_vol=0.1)
 #mesh.plot_mesh()
 mesh.fillNodeList()
 mesh.fillElementList()
 mesh.fillDOFList()
-assembler = Assembler(mesh)
-#assembler.assemble_total()
+a1 = Assembler(mesh)
+A,f = a1.assemble_total()
+
+plt.imshow(A)
+plt.show()
+
+u = np.linalg.solve(A, f)
+plt.tricontourf(mesh.triangles, u)
+plt.show()
+
 
 
 

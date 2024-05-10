@@ -4,10 +4,8 @@ from ShapeFunctions.HatFunction import HatFunction
 import numpy as np
 
 class Assembler:
-    def __init__(self, Mesh: Mesh):
-        self.Mesh = Mesh
-        self.A = np.zeros((len(self.Mesh.dof_list), len(self.Mesh.dof_list)))
-        self.f = np.zeros((len(self.Mesh.dof_list)))
+    def __init__(self, mesh):
+        self.Mesh = mesh
     
     def get_element_matrix(element):
         
@@ -47,15 +45,18 @@ class Assembler:
                     A[dof1.dof_number, dof2.dof_number] += A_element[i, j]
                 f[dof1.dof_number] += f_element[i]
 
+            for i in range(3):
+                edge = element.edges[i]
+            
+                A_edge, f_edge = Assembler.get_edge_matrix(edge)
+                i, dof1 = 0, edge.dof_list[0]
+                j, dof2 = 1, edge.dof_list[1]
 
-        #for edge in self.Mesh.edge_list:
-        #    A_edge, f_edge = Assembler.get_edge_matrix(edge)
-        #    i, dof1 = 0, edge.dof_list[0]
-        #    j, dof2 = 1, edge.dof_list[1]
-        #        
-        #    A[dof1.dof_number, dof2.dof_number] += A_edge[i, j]
-        #    f[dof1.dof_number] += f_edge[i]
-        #    f[dof2.dof_number] += f_edge[j]
+                A[dof1.dof_number, dof2.dof_number] += A_edge[i, j]
+                f[dof1.dof_number] += f_edge[i]
+                f[dof2.dof_number] += f_edge[j]
+
+        return A, f
 
 
     
