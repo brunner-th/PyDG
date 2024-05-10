@@ -2,9 +2,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 import meshpy.triangle as triangle
 import meshpy.tet as tet
-from Node import Node
-from Element import Element
-from DOF import DOF
+from DataContainers.Node import Node
+from DataContainers.Element import Element
+from DataContainers.DOF import DOF
 
 
 class Mesh:
@@ -17,7 +17,7 @@ class Mesh:
         self.element_list = None
         self.node_connectivity_matrix = None
         self.edge_connectivity_matrix = None
-    
+        
 
     def generate_square_mesh_with_hole(self):
 
@@ -123,5 +123,8 @@ class Mesh:
     def calculate_edge_connectivity_matrix():
         edge_connectivity_matrix = np.zeros((10))
         return edge_connectivity_matrix
+    
+    def RHSFunction(x, y):
+        return 1
     
 

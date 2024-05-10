@@ -1,6 +1,6 @@
 import numpy as np
-from Node import Node
-from DOF import DOF
+from DataContainers.Node import Node
+from DataContainers.DOF import DOF
 
 class Element:
     def __init__(self, element_number: int, node_list: list[Node], edges: dict[int: list[Node, Node]]):
