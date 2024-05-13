@@ -11,6 +11,7 @@ mesh.generate_basic_square_mesh(max_vol=0.1)
 mesh.fillNodeList()
 mesh.fillElementList()
 mesh.fillDOFList()
+mesh.fillEdgeList()
 a1 = Assembler(mesh)
 A,f = a1.assemble_total()
 
