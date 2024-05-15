@@ -9,7 +9,16 @@ class HatFunction:
         b = A[1,:]
         c = A[2,:]
         value = a+b*eval_x+c*eval_y
-        return value, b, c
+        return value, a, b, c
+    
+    def evaluateValueHatFunction(self, x_nodes, y_nodes, eval_x, eval_y):
+        V = np.array([np.full_like(x_nodes, 1), x_nodes, y_nodes])
+        A = np.linalg.solve(V, np.diag([1, 1, 1]))
+        a = A[0,:]
+        b = A[1,:]
+        c = A[2,:]
+        value = a+b*eval_x+c*eval_y
+        return value
     
     def HatGradients(self, x,y):
         area = 0.5 * abs((x[0] * (y[1] - y[2]) + x[1] * (y[2] - y[0]) + x[2] * (y[0] - y[1])))

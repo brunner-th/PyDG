@@ -4,24 +4,33 @@ import DataContainers.Mesh as Mesh
 from Assembler.Assembler import Assembler
 #import SimulationCase
 
+alpha = -100
+beta = 10
+h = 0.1
 
 mesh = Mesh.Mesh()
-mesh.generate_basic_square_mesh(max_vol=0.1)
-#mesh.plot_mesh()
+mesh.generate_basic_square_mesh(max_vol=h*h/2, min_angle=30)
+mesh.plot_mesh()
 mesh.fillNodeList()
 mesh.fillElementList()
 mesh.fillDOFList()
 mesh.fillEdgeList()
-a1 = Assembler(mesh)
+a1 = Assembler(mesh, h, alpha, beta)
 A,f = a1.assemble_total()
 
 plt.imshow(A)
-plt.show()
 
+#f[0] = 100
+#f[1] = 100
+#f[2] = 100
 u = np.linalg.solve(A, f)
-plt.tricontourf(mesh.triangles, u)
+
+ax = plt.figure().add_subplot(projection='3d')
+#ax.tricontourf(mesh.getDOFPositions()[:,0], mesh.getDOFPositions()[:,1], u, 500, cmap='magma')
+ax.plot_trisurf(mesh.getDOFPositions()[:,0], mesh.getDOFPositions()[:,1], u, triangles = mesh.getDOFTriangles(), cmap='magma', edgecolor='k')
 plt.show()
 
+print("Finished!")
 
 
 

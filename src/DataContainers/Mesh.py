@@ -55,7 +55,7 @@ class Mesh:
         self.facets = np.array(mesh.facets)
 
 
-    def generate_basic_square_mesh(self, max_vol = 0.01):
+    def generate_basic_square_mesh(self, max_vol = 0.01, min_angle=30):
 
         points = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 0)]
         facets = [[0, 1], [1, 2], [2, 3], [3, 1]]
@@ -69,7 +69,7 @@ class Mesh:
         info.set_points(points)
         info.set_facets(facets)
 
-        mesh = triangle.build(info, max_volume=max_vol)
+        mesh = triangle.build(info, max_volume=max_vol, min_angle=min_angle)
 
         self.points = np.array(mesh.points)
         self.triangles = np.array(mesh.elements)
@@ -200,7 +200,21 @@ class Mesh:
         #for edge in self.edge_list:
             #if edge.assigned_to_host == False:
 
+    def getDOFPositions(self):
+        dof_positions = np.zeros((len(self.dof_list), 2))
+        for dof in self.dof_list:
+            dof_positions[dof.dof_number, :] = dof.position
+        return dof_positions
+
+    def getDOFTriangles(self):
+        dof_triangles = np.zeros((len(self.element_list), 3))
+        for element in self.element_list:
+            for ind, dof in enumerate(element.dof_list):
+                dof_triangles[element.element_number, ind] = dof.dof_number
+        return dof_triangles
     
+    def RHSFunction(x, y):
+        return 2*np.pi**2*np.sin(np.pi*x)*np.sin(np.pi*y)
 
     def calculate_point_connectivity_matrix():
         point_connectivity_matrix = np.zeros((10))
@@ -210,7 +224,6 @@ class Mesh:
         edge_connectivity_matrix = np.zeros((10))
         return edge_connectivity_matrix
     
-    def RHSFunction(x, y):
-        return x + y
+    
     
 
