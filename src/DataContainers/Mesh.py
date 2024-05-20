@@ -131,8 +131,8 @@ class Mesh:
             self.connectivity[nodelist[2], nodelist[0]] += 1
             self.connectivity[nodelist[0], nodelist[2]] += 1
 
-        plt.imshow(self.connectivity)
-        plt.show()
+        #plt.imshow(self.connectivity)
+        #plt.show()
         edge_num = 0
         for ind1 in range(len(self.connectivity)):
             for ind2 in range(len(self.connectivity)):
@@ -147,10 +147,31 @@ class Mesh:
                             index_1 = dof.dof_number
                         elif dof.node_number == self.node_list[ind2].node_number:
                             index_2 = dof.dof_number
+                    cnt = 0
+                    for element in self.element_list:
+                        if self.node_list[ind1].node_number in element.node_num_list and self.node_list[ind2].node_number in element.node_num_list:
+                            
+                            if cnt == 0:
+                                edge.assigned_to_host = True
+                                edge.host_element = element
+
+                                #for dof in element.dof_list:
+                                #    if dof.node_number == self.node_list[ind1].node_number:
+                                #        index_1 = dof.dof_number
+                                #    elif dof.node_number == self.node_list[ind2].node_number:
+                                #        index_2 = dof.dof_number
+
+                                #edge.dof_list = [self.dof_list[index_1], self.dof_list[index_2]]
+                                #element.addEdge(edge)
+                                cnt += 1
+                            else:
+                                raise Exception("More than 1 elements connected to an boundary edge")
+                            
                     edge.dof_list = [self.dof_list[index_1], self.dof_list[index_2]]
                     self.edge_list.append(edge)
                     self.neumann_edge_list.append(edge)
                     edge_num += 1
+                
                 elif self.connectivity[ind1, ind2] == 2:
                     edge = Edge(edge_num, self.node_list[ind1], self.node_list[ind2])
                     edge.setType("Internal")
@@ -180,26 +201,13 @@ class Mesh:
                     self.internal_edge_list.append(edge)
                     edge_num += 1
 
-    
-
-
-
 
     def fillNeumannEdgeList(self):
         self.neumann_edge_list = []
         for element1 in self.element_list:
             for edge1 in element1.edges:
                 edge1.counter += 1
-                
-
-                            
-                
-    
-    def fillInternalEdgeList(self):
-        self.internal_edge_list = []
-        #for edge in self.edge_list:
-            #if edge.assigned_to_host == False:
-
+            
     def getDOFPositions(self):
         dof_positions = np.zeros((len(self.dof_list), 2))
         for dof in self.dof_list:
@@ -216,13 +224,7 @@ class Mesh:
     def RHSFunction(x, y):
         return 2*np.pi**2*np.sin(np.pi*x)*np.sin(np.pi*y)
 
-    def calculate_point_connectivity_matrix():
-        point_connectivity_matrix = np.zeros((10))
-        return point_connectivity_matrix
 
-    def calculate_edge_connectivity_matrix():
-        edge_connectivity_matrix = np.zeros((10))
-        return edge_connectivity_matrix
     
     
     
