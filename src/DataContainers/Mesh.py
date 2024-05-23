@@ -6,7 +6,7 @@ from DataContainers.Node import Node
 from DataContainers.Edge import Edge
 from DataContainers.Element import Element
 from DataContainers.DOF import DOF
-
+import h5py
 
 class Mesh:
     def __init__(self):
@@ -21,6 +21,8 @@ class Mesh:
         self.neumann_edge_list = None
         self.connectivity = None
         
+    def RHSFunction(x, y):
+        return 2*np.pi**2*np.sin(np.pi*x)*np.sin(np.pi*y)
 
     def generate_square_mesh_with_hole(self):
 
@@ -76,9 +78,13 @@ class Mesh:
         self.facets = np.array(mesh.facets)
 
     
-    def plot_mesh(self):
-        plt.triplot(self.points[:, 0], self.points[:, 1], self.triangles, linewidth = 1)
-        plt.show()
+    def plot_mesh(self, ax = None):
+        if ax is None:
+            plt.triplot(self.points[:, 0], self.points[:, 1], self.triangles, linewidth = 1)
+            plt.show()
+        else:
+            ax.triplot(self.points[:, 0], self.points[:, 1], self.triangles, linewidth = 1)
+
 
     def fillNodeList(self):
         self.node_list = []
@@ -154,15 +160,6 @@ class Mesh:
                             if cnt == 0:
                                 edge.assigned_to_host = True
                                 edge.host_element = element
-
-                                #for dof in element.dof_list:
-                                #    if dof.node_number == self.node_list[ind1].node_number:
-                                #        index_1 = dof.dof_number
-                                #    elif dof.node_number == self.node_list[ind2].node_number:
-                                #        index_2 = dof.dof_number
-
-                                #edge.dof_list = [self.dof_list[index_1], self.dof_list[index_2]]
-                                #element.addEdge(edge)
                                 cnt += 1
                             else:
                                 raise Exception("More than 1 elements connected to an boundary edge")
@@ -221,8 +218,20 @@ class Mesh:
                 dof_triangles[element.element_number, ind] = dof.dof_number
         return dof_triangles
     
-    def RHSFunction(x, y):
-        return 2*np.pi**2*np.sin(np.pi*x)*np.sin(np.pi*y)
+    def saveMesh(self, file):
+        
+        with h5py.File(file, 'w') as hf:
+            hf.create_dataset("points",  data=self.points)
+            hf.create_dataset("triangles",  data=self.triangles)
+            hf.create_dataset("facets",  data=self.facets)
+
+        
+    def loadMesh(self, file):
+        f = h5py.File(file, "r")
+        self.points = np.array(f["points"])
+        self.triangles = np.array(f["triangles"])
+        self.facets = np.array(f["facets"])
+        f.close()
 
 
     

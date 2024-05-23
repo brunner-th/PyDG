@@ -2,7 +2,7 @@
 from DataContainers.Mesh import Mesh
 from DataContainers.Edge import Edge
 from DataContainers.Element import Element
-from ShapeFunctions.HatFunction import HatFunction
+from ShapeFunctions.LinearBasisFunction import LinearBasisFunction
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +14,7 @@ class Assembler:
         self.beta = beta
         self.h = h
     
+
     def __get_element_matrix(self, element: Element):
         
         dof_nums = np.zeros((len(element.dof_list)))
@@ -27,10 +28,9 @@ class Assembler:
             y_coords[ind] = dof.position[1]
             dof_nums[ind] = dof.dof_number
 
+        area, b, c = LinearBasisFunction().evalulateGradientsLinearBasisFunction(x_coords, y_coords)
 
-        area, b, c = HatFunction().HatGradients(x_coords, y_coords)
-
-        A_element = area * (np.outer(b, b) + np.outer(c, c))
+        A_element = area * (np.outer(b, b) + np.outer(c, c)) # classical stiffness matrix
         force_val = Mesh.RHSFunction(np.mean(x_coords), np.mean(y_coords))
         f_element =  area*np.full((len(element.dof_list)), force_val/(3))
 
@@ -42,7 +42,6 @@ class Assembler:
         PE = np.zeros((6, 6))
         f_edge = np.zeros((6))
         dof_nums = np.zeros((6))
-
         x_coords_edge = np.zeros(2)
         y_coords_edge = np.zeros(2)
         x_coords_host = np.zeros(3)
@@ -59,17 +58,12 @@ class Assembler:
             y_coords_host[ind] = dof.position[1]
             dof_nums[ind] = dof.dof_number
 
-        
-
-        weights = np.array([1, 4, 1])/6
-        transformation_matrix = np.array([[2,0], [1,1] ,[0,2]])/2
+        weights = np.array([1, 4, 1])/6 # simpson integration rule
+        transformation_matrix = np.array([[1,0], [0.5,0.5] ,[0,1]]) # integration points
         eval_x = transformation_matrix @ x_coords_edge
         eval_y = transformation_matrix @ y_coords_edge
 
-        
-
         ds = np.sqrt(np.array([x_coords_edge[1]-x_coords_edge[0]])**2 + np.array([y_coords_edge[1]-y_coords_edge[0]])**2)
-
         nx = (y_coords_edge[1]-y_coords_edge[0])/ds
         ny = -(x_coords_edge[1]-x_coords_edge[0])/ds
 
@@ -80,22 +74,20 @@ class Assembler:
             nx = -nx
             ny = -ny
 
-        plt.plot([0,1,1,0,0],  [0,0,1,1,0], 'k-')
-        plt.plot(x_coords_edge, y_coords_edge, 'r-')
+        #plt.plot([0,1,1,0,0],  [0,0,1,1,0], 'k-')
+        #plt.plot(x_coords_edge, y_coords_edge, 'r-')
         #plt.plot(x_coords_host, y_coords_host, 'g-')
         #plt.plot(x_coords_slave, y_coords_slave, 'r-')
         #plt.plot([np.mean(x_coords_host)], [np.mean(y_coords_host)], 'go')
         #plt.plot([np.mean(x_coords_slave)], [np.mean(y_coords_slave)], 'ro')
         #plt.plot(eval_x, eval_y, 'k+',)
         #plt.plot([np.mean(x_coords_edge), np.mean(x_coords_edge)+nx*self.h], [np.mean(y_coords_edge), np.mean(y_coords_edge)+ny*self.h], 'b-')
-        
-        plt.show()
-        for ind, weight in enumerate(weights):
-            lenght_subinterval = weight*ds
-            
-            value_host, _, b_host, c_host = HatFunction().evaluateHatFunction(x_coords_host, y_coords_host, eval_x[ind], eval_y[ind])
-            #value_slave, _, b_slave, c_slave = HatFunction().evaluateHatFunction(x_coords_slave, y_coords_slave, eval_x[ind], eval_y[ind])
+        #plt.show()
 
+        for ind, weight in enumerate(weights):
+
+            lenght_subinterval = weight*ds
+            value_host, _, b_host, c_host = LinearBasisFunction().evaluateLinearBasisFunction(x_coords_host, y_coords_host, eval_x[ind], eval_y[ind])
             jump = np.vstack((value_host , np.array([0,0,0])))
             average = np.vstack((nx*b_host + ny*c_host,  np.array([0,0,0])))/2
         
@@ -108,6 +100,7 @@ class Assembler:
         #plt.show()
 
         return PE, SE, f_edge, dof_nums
+
 
     def __get_internal_edge_matrix(self, edge: Edge):
         
@@ -143,8 +136,8 @@ class Assembler:
             y_coords_slave[ind] = dof.position[1]
             dof_nums[3+ind] = dof.dof_number
         
-        weights = np.array([1, 4, 1])/6
-        transformation_matrix = np.array([[2,0], [1,1] ,[0,2]])/2
+        weights = np.array([1, 4, 1])/6 # simpson integration rule
+        transformation_matrix = np.array([[1,0], [0.5,0.5] ,[0,1]]) # integration points
         eval_x = transformation_matrix @ x_coords_edge
         eval_y = transformation_matrix @ y_coords_edge
         ds = np.sqrt(np.array([x_coords_edge[1]-x_coords_edge[0]])**2 + np.array([y_coords_edge[1]-y_coords_edge[0]])**2)
@@ -168,11 +161,10 @@ class Assembler:
         #plt.show()
 
         for ind, weight in enumerate(weights):
-            lenght_subinterval = weight*ds
-            
-            value_host, _, b_host, c_host = HatFunction().evaluateHatFunction(x_coords_host, y_coords_host, eval_x[ind], eval_y[ind])
-            value_slave, _, b_slave, c_slave = HatFunction().evaluateHatFunction(x_coords_slave, y_coords_slave, eval_x[ind], eval_y[ind])
 
+            lenght_subinterval = weight*ds
+            value_host, _, b_host, c_host = LinearBasisFunction().evaluateLinearBasisFunction(x_coords_host, y_coords_host, eval_x[ind], eval_y[ind])
+            value_slave, _, b_slave, c_slave = LinearBasisFunction().evaluateLinearBasisFunction(x_coords_slave, y_coords_slave, eval_x[ind], eval_y[ind])
             jump = np.vstack((value_host , -value_slave))
             average = np.vstack((nx*b_host + ny*c_host, nx*b_slave + ny*c_slave))/2
         
@@ -186,12 +178,15 @@ class Assembler:
 
         return PE, SE, f_edge, dof_nums
     
-    def __get_neumann_edge_matrix(self, edge: Edge):
+
+    def __get_neumann_edge_matrix(self, edge: Edge): # not implemented yet
         A_edge = np.zeros((2, 2))
         f_edge = np.zeros((2))
         return A_edge, f_edge
         
+
     def assemble_total(self):
+
         U = np.zeros((len(self.Mesh.dof_list), len(self.Mesh.dof_list)))
         P = np.zeros((len(self.Mesh.dof_list), len(self.Mesh.dof_list)))
         S = np.zeros((len(self.Mesh.dof_list), len(self.Mesh.dof_list)))
@@ -201,33 +196,23 @@ class Assembler:
         internal_edges = self.Mesh.internal_edge_list
         neumann_edges = self.Mesh.neumann_edge_list
 
-        for element in self.Mesh.element_list:
+        for element in self.Mesh.element_list: # loop over all elements
             A_element, f_element, dof_nums = self.__get_element_matrix(element)
             for i, dof1 in enumerate(dof_nums):
                 for j, dof2 in enumerate(dof_nums):
                     A[int(dof1), int(dof2)] += A_element[i, j]
-                    
-                    
                 f[int(dof1)] += f_element[i]
 
-            
-
-        
-        #plt.show()
-
-        for edge in internal_edges:
+        for edge in internal_edges: # loop over all internal edges
                 
             PE, SE, _, dof_nums = self.__get_internal_edge_matrix(edge)
-
-            
 
             for i, dof1 in enumerate(dof_nums):
                 for j, dof2 in enumerate(dof_nums):
                     P[int(dof1), int(dof2)] += PE[i, j]
                     S[int(dof1), int(dof2)] += SE[i, j]
                 
-                   
-        for edge in neumann_edges:
+        for edge in neumann_edges: # loop over all neumann edges
             
             PE, SE, _, dof_nums = self.__get_boundary_edge_matrix(edge)
 
@@ -237,8 +222,6 @@ class Assembler:
                     P[int(dof1), int(dof2)] += PE[i, j]
                     S[int(dof1), int(dof2)] += SE[i, j]
 
-            
-            
         U = (A-S+self.alpha*np.transpose(S)+self.beta/self.h*P)
         
         return U, f
