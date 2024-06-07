@@ -30,3 +30,5 @@ print(np.shape(mesh.dof_list))
 
 plt.show()
 
+mesh.fillDOFList()
+
